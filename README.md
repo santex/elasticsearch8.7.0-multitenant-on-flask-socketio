@@ -50,4 +50,8 @@ This returns:
 
 ## socket io  on 
 
-* browser http://bam.localhost 
+* browser http://multitenant.localhost 
+
+## elasticsearch8.7.0 multitenant on 
+
+* browser http://localhost:8080/
