@@ -1,0 +1,105 @@
+version: '3.9'
+services:
+  caddy: # Reverse proxy.
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    networks:
+      app_net:
+        ipv4_address: 219.20.128.0
+
+  foo: # App foo.
+    build: ./apps/app1
+    environment:
+      - PORT=5001
+    ports:
+      - "5001:5001"
+    networks:
+      app_net:
+        ipv4_address: 219.20.128.1
+
+  bar: # App bar.
+    build: ./apps/app2
+    environment:
+      - PORT=5002
+    ports:
+      - "5002:5002"
+    networks:
+      app_net:
+        ipv4_address: 219.20.128.2
+
+  baz: # App bar.
+    build: ./apps/app3
+    environment:
+      - PORT=5003
+    ports:
+      - "5003:5003"
+    networks:
+      app_net:
+        ipv4_address: 219.20.128.3
+
+  bam: # App bar.
+    build: ./apps/app4
+    environment:
+      - PORT=5000
+    ports:
+      - "8000:5000"
+    networks:
+      app_net:
+        ipv4_address: 219.20.128.4
+
+  openresty:
+    build: ./apps/openresty
+    container_name: openresty
+    ports:
+      - "8080:80"
+    volumes:
+      - ./apps/openresty/conf/authorize.lua:/usr/local/openresty/nginx/conf/authorize.lua
+      - ./apps/openresty/conf/nginx_authorize_by_lua.conf:/usr/local/openresty/nginx/conf/nginx_authorize_by_lua.conf
+    restart: always
+    
+    environment:
+      - PORT=8080
+    networks:
+      app_net:
+        ipv4_address: 219.20.128.5
+
+
+
+  elasticsearch:
+    container_name: elasticsearch
+    build: ./apps/elasticsearch
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data      
+      - ./scripts:/app
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      app_net:
+        ipv4_address: 219.20.128.6
+
+networks: # Define custom network to assign static IPs to the container.
+  app_net:
+    ipam:
+      config:
+        - subnet: 219.20.0.0/16
+      
+volumes:
+  elasticsearch-data:
+    driver: local

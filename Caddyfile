@@ -1,0 +1,23 @@
+foo.localhost:80 {
+  reverse_proxy foo:5001
+}
+
+bar.localhost:80 {
+  reverse_proxy bar:5002
+}
+baz.localhost:80 {
+  reverse_proxy baz:5003
+}
+
+bam.localhost:80 {
+  reverse_proxy bam:5000
+}
+
+multitenant.localhost:80 {
+  reverse_proxy openresty:8080
+}
+
+elasticsearch.localhost:80 {
+  reverse_proxy openresty:9200
+}
+
